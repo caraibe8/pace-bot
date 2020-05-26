@@ -121,22 +121,6 @@ exports.SongManager = function SongManager(bot) {
     return self;
 };
 
-function NextVideosUrl(url) {
-    const self = this;
-    this.url = url;
-    this.getSongs = getSongs;
-
-    async function getSongs() {
-        return await getVideosLinks(self.url);
-    }
-}
-
-function Url(url, type) {
-    this.url = url;
-    this.type = type;
-    this.isVideo = type === typeVideo;
-}
-
 async function getVideosLinks(url, playlistId) {
     const baseUrl = 'https://www.youtube.com/watch?v=';
     let videoIds = [];
