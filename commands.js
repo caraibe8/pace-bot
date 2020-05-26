@@ -22,7 +22,6 @@ function clear(bot, args) {
     bot.write(songManager.clear());
 }
 
-
 function pause(bot, args) {
     bot.write(songManager.pause());
 }

@@ -3,6 +3,11 @@ const axios = require('axios');
 const api = require('./apiReferences.js').api;
 const __ = require('./resources.js').resource;
 
+const typeVideo = 'video';
+const typePlaylistPage = 'page';
+
+const maxPlaylistItemPerPage = 1;
+
 exports.SongManager = function SongManager(bot) {
     const self = this;
     this._queue = [];
@@ -22,13 +27,14 @@ exports.SongManager = function SongManager(bot) {
         const match = url.match(listRegex);
         let nbAdded = 0;
         if (match) {
-
-            (await getAllLinks(match[0].replace('list=', ''))).forEach(url => {
+            const playlistId = match[0].replace('list=', '');
+            const urls = await getVideosLinks(buildGetPlaylistUrl(playlistId), playlistId);
+            urls.urls.forEach(url => {
                 self._queue.push(url);
-                ++nbAdded;
             });
+            nbAdded = urls.count;
         } else {
-            self._queue.push(url);
+            self._queue.push({url: url, type: typeVideo, playlistId: null});
             ++nbAdded;
         }
         if (!self._dispatcher && self._queue.length !== 0) {
@@ -46,7 +52,7 @@ exports.SongManager = function SongManager(bot) {
             play();
             return __('commands.next.results.positive.playingNext');
         } else {
-            if (self._queue.length == 0) {
+            if (self._queue.length === 0) {
                 return __('commands.next.results.negative');
             } else {
                 self._queue = [];
@@ -97,34 +103,68 @@ exports.SongManager = function SongManager(bot) {
         if (self._dispatcher) {
             self._dispatcher.destroy();
         }
-        let nextUrl = self._queue[0];
+        if (self._queue.length > 0) {
+            let nextVideo = self._queue[0];
+            if (nextVideo.type === typePlaylistPage) {
+                const videos = await getVideosLinks(nextVideo.url, nextVideo.playlistId);
+                self._queue = videos.urls.concat(self._queue.slice(1));
+                nextVideo = self._queue[0];
+            }
 
-        self._dispatcher = self._bot.voiceChannelConnection.play(ytdl(self._queue[0], {filter: 'audioonly'}));
-        self._dispatcher.on('finish', () => {
-            next();
-        });
-
+            self._dispatcher = self._bot.voiceChannelConnection.play(ytdl(nextVideo.url, {filter: 'audioonly'}));
+            self._dispatcher.on('finish', () => {
+                next();
+            });
+        }
     }
 
     return self;
 };
 
-async function getAllLinks(playlistId) {
-    const baseUrl = 'https://youtube.com/watch?v=';
+function NextVideosUrl(url) {
+    const self = this;
+    this.url = url;
+    this.getSongs = getSongs;
+
+    async function getSongs() {
+        return await getVideosLinks(self.url);
+    }
+}
+
+function Url(url, type) {
+    this.url = url;
+    this.type = type;
+    this.isVideo = type === typeVideo;
+}
+
+async function getVideosLinks(url, playlistId) {
+    const baseUrl = 'https://www.youtube.com/watch?v=';
     let videoIds = [];
-    const request = axios.get(api.get.playlistItems + '?key='+process.env.GOOGLE_API_KEY+'&playlistId='+playlistId+'&part=contentDetails')
+    let nextPageToken = null;
+    let itemsCount = 0;
+    const request = axios.get(url)
         .then(function(res) {
             res.data.items.forEach(playlistItem => {
                 videoIds.push(playlistItem.contentDetails.videoId);
             });
-            items = res.data.items;
-            console.log(res.data);
+            nextPageToken = res.data.nextPageToken;
+            itemsCount = res.data.pageInfo.totalResults;
         }).catch(function(res) {
             console.log(res);
+            // TODO
         });
 
     await request;
-    return videoIds.map(id => {
-        return baseUrl + id;
+    let videosUrl = videoIds.map(id => {
+        return {url: baseUrl + id, type: typeVideo, playlistId: playlistId};
     });
+    if (nextPageToken) {
+        videosUrl.push({url: buildGetPlaylistUrl(playlistId, nextPageToken), type: typePlaylistPage, playlistId: playlistId});
+    }
+    return {urls: videosUrl, count: itemsCount};
+}
+
+function buildGetPlaylistUrl(playlistId, pageToken = null) {
+    return api.get.playlistItems + '?key='+process.env.GOOGLE_API_KEY+'&playlistId='+playlistId+'&part=contentDetails'+
+        '&maxResults='+maxPlaylistItemPerPage+(pageToken ? '&pageToken='+pageToken : '');
 }
