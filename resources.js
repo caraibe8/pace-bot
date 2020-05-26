@@ -51,6 +51,14 @@ const resources = {
     },
 };
 
+/**
+ * @description Formats and returns a resource
+ * @author Alexandre Gallant <1alexandregallant@gmail.com>
+ *
+ * @param resourceName Name of the resource to return
+ * @param params Parameters to use to format the resource
+ * @returns {string} The resource
+ */
 exports.resource = function (resourceName, params = []) {
     const resourceNameParts = resourceName.split('.');
     let resource = resources;
