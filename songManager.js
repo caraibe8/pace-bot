@@ -51,7 +51,7 @@ exports.SongManager = function SongManager(bot) {
                 self._queue.push({url: buildGetPlaylistUrl(playlistId, result.data.nextPageToken), type: typePlaylistPage});
             }
             nbAdded = result.data.count;
-            error = error ? result.error.display : null;
+            error = result.error ? result.error.display : null;
         } else {
             self._queue.push({url: url, type: typeVideo});
             ++nbAdded;
@@ -182,7 +182,7 @@ exports.SongManager = function SongManager(bot) {
         const result = await getVideosLinks(url);
         if (result.data.nextPageToken) {
             const playlistId = url.match(/playlistId=[^&]+/)[0].replace('playlistId=', '');
-            result.urls.push({url: buildGetPlaylistUrl(playlistId, result.data.nextPageToken), type: typePlaylistPage})
+            result.data.urls.push({url: buildGetPlaylistUrl(playlistId, result.data.nextPageToken), type: typePlaylistPage})
         }
 
         self._queue = result.data.urls.concat(self._queue.slice(1));
@@ -226,7 +226,6 @@ exports.SongManager = function SongManager(bot) {
         result.data.urls = videoIds.map(id => {
             return {url: baseUrl + id, type: typeVideo};
         });
-        console.log(result);
         return result;
     }
 
