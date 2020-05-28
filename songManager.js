@@ -2,6 +2,8 @@ const ytdl = require('ytdl-core');
 const axios = require('axios');
 const api = require('./apiReferences.js').api;
 const __ = require('./resources.js').resource;
+const RequestResult = require('./util.js').RequestResult;
+const RequestError = require('./util.js').RequestError;
 
 const typeVideo = 'video';
 const typePlaylistPage = 'page';
@@ -38,27 +40,26 @@ exports.SongManager = function SongManager(bot) {
         const listRegex = /list=[^&]+/;
         const match = url.match(listRegex);
         let nbAdded = 0;
+        let error = null;
         if (match) {
             const playlistId = match[0].replace('list=', '');
-            const urls = await getVideosLinks(buildGetPlaylistUrl(playlistId), playlistId);
-            urls.urls.forEach(url => {
+            const result = await getVideosLinks(buildGetPlaylistUrl(playlistId));
+            result.data.urls.forEach(url => {
                 self._queue.push(url);
             });
-            if (urls.nextPageToken) {
-                self._queue.push({url: buildGetPlaylistUrl(playlistId, urls.nextPageToken), type: typePlaylistPage});
+            if (result.data.nextPageToken) {
+                self._queue.push({url: buildGetPlaylistUrl(playlistId, result.data.nextPageToken), type: typePlaylistPage});
             }
-            nbAdded = urls.count;
+            nbAdded = result.data.count;
+            error = error ? result.error.display : null;
         } else {
             self._queue.push({url: url, type: typeVideo});
             ++nbAdded;
         }
-        if (!self._dispatcher && self._queue.length !== 0) {
-            play();
+        if (!self._dispatcher) {
+            await play();
         }
-        return __('commands.play.results.positive', [{
-            name: 'amount',
-            value: nbAdded,
-        }]);
+        return error ? error : __('commands.play.results.positive', [{name: 'amount', value: nbAdded,}]);
     }
 
     /**
@@ -142,7 +143,7 @@ exports.SongManager = function SongManager(bot) {
      * @description Plays the next videos in the playlist
      * @author Alexandre Gallant <1alexandregallant@gmail.com>
      *
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>} If a video is played
      */
     async function play() {
         if (self._dispatcher) {
@@ -154,12 +155,20 @@ exports.SongManager = function SongManager(bot) {
                 await prependPageToPlaylist(nextVideo.url);
                 nextVideo = self._queue[0];
             }
-
             self._dispatcher = self._bot.voiceChannelConnection.play(ytdl(nextVideo.url, {filter: 'audioonly'}));
             self._dispatcher.on('finish', () => {
                 next();
+            }).on('error', error => {
+                if (error.message === 'input stream: Video unavailable') {
+                    self._bot.write(__('songManager.invalidUrl', [{name: 'url', value: nextVideo.url}]));
+                } else {
+                    self._bot.write(error.stack);
+                }
+                next();
             });
+            return true;
         }
+        return false;
     }
 
     /**
@@ -170,49 +179,59 @@ exports.SongManager = function SongManager(bot) {
      * @returns {Promise<void>}
      */
     async function prependPageToPlaylist(url) {
-        const urls = await getVideosLinks(url);
-        if (urls.nextPageToken) {
+        const result = await getVideosLinks(url);
+        if (result.data.nextPageToken) {
             const playlistId = url.match(/playlistId=[^&]+/)[0].replace('playlistId=', '');
-            urls.urls.push({url: buildGetPlaylistUrl(playlistId, urls.nextPageToken), type: typePlaylistPage})
+            result.urls.push({url: buildGetPlaylistUrl(playlistId, result.data.nextPageToken), type: typePlaylistPage})
         }
 
-        self._queue = urls.urls.concat(self._queue.slice(1));
+        self._queue = result.data.urls.concat(self._queue.slice(1));
+    }
+
+    /**
+     * @description execute the given request and builds a list of videos' url with the result
+     * @author Alexandre Gallant <1alexandregallant@gmail.com>
+     *
+     * @param {string} url The request
+     * @param {boolean} displayErrors If an error message should be sent if the request fails
+     * @returns {Promise<RequestResult>} An object containing the result of the request
+     */
+    async function getVideosLinks(url, displayErrors = false) {
+        const baseUrl = 'https://www.youtube.com/watch?v=';
+        const result = new RequestResult({urls: [], count: 0, nextPageToken: null}, -1);
+        let videoIds = [];
+        const request = axios.get(url)
+            .then(function(res) {
+                res.data.items.forEach(playlistItem => {
+                    videoIds.push(playlistItem.contentDetails.videoId);
+                });
+                result.data.nextPageToken = res.data.nextPageToken;
+                result.data.count = res.data.pageInfo.totalResults;
+                result.status = res.status;
+            }).catch(function(res) {
+                let errorDisplay = null;
+                switch (res.response.data.error.code) {
+                    case 403: errorDisplay = __('songManager.errorCode403'); break;
+                    case 404: errorDisplay = __('songManager.errorCode404'); break;
+                    default: {
+                        console.log('UNSUPPORTED STATUS CODE');
+                        console.log(res);
+                    } break;
+                }
+                result.error = new RequestError(res.response.data.error.message, errorDisplay);
+                result.status = res.response.status;
+            });
+
+        await request;
+        result.data.urls = videoIds.map(id => {
+            return {url: baseUrl + id, type: typeVideo};
+        });
+        console.log(result);
+        return result;
     }
 
     return self;
 };
-
-/**
- * @description execute the given request and builds a list of videos' url with the result
- * @author Alexandre Gallant <1alexandregallant@gmail.com>
- *
- * @param {string} url The request
- * @returns {Promise<{urls: *, nextPageToken: *, count: *}>} An object containing the videos' url, the token to use to
- * get the next page and the total of videos in the playlist
- */
-async function getVideosLinks(url) {
-    const baseUrl = 'https://www.youtube.com/watch?v=';
-    let videoIds = [];
-    let nextPageToken = null;
-    let itemsCount = 0;
-    const request = axios.get(url)
-        .then(function(res) {
-            res.data.items.forEach(playlistItem => {
-                videoIds.push(playlistItem.contentDetails.videoId);
-            });
-            nextPageToken = res.data.nextPageToken;
-            itemsCount = res.data.pageInfo.totalResults;
-        }).catch(function(res) {
-            console.log(res);
-            // TODO
-        });
-
-    await request;
-    let videosUrl = videoIds.map(id => {
-        return {url: baseUrl + id, type: typeVideo};
-    });
-    return {urls: videosUrl, count: itemsCount, nextPageToken: nextPageToken};
-}
 
 /**
  * @description Builds a request to get a list of playlist items from the Google API

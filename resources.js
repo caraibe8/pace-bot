@@ -1,5 +1,5 @@
 const resources = {
-    unknownCommand: 'Sorry, I don\'t know this command... :neutral_face:',
+    unknownCommand: 'Sorry, I don\'t know this command... :bidenconfused:',
     invalidParams: 'TODO\nUsage: {{usage}}',
     commands: {
         play: {
@@ -48,6 +48,11 @@ const resources = {
                 negative: 'There are not queued song *(à revoir)*',
             },
         },
+    },
+    songManager: {
+        invalidUrl: 'It looks like "{{url}}" isn\'t a valid url',
+        errorCode403: 'Youtube is telling me i am not allowed to access this playlist :bidensad:',
+        errorCode404: 'Youtube is telling me that this playlist doesn\'t exist :bidenconfused:',
     },
 };
 
