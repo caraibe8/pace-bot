@@ -1,18 +1,19 @@
 const __ = require('./resources.js').resource;
-const commands = require('./commands');
-
+const CommandManager = require('./commands').CommandManager;
 const voiceChannelName = 'Pace-Radio';
 const commandChannelName = 'music-bot-commands';
 const commandsPrefix = '$';
 
-exports.Bot = function Bot(discord) {
+function Bot(discord) {
     /* Constant */
     const self = this;
 
     /* Variables */
     this.client = new discord.Client();
+
     this.commandChannel = null;
     this.voiceChannelConnection = null;
+    this._commandManager = null;
 
     /* Functions */
     this.login = login;
@@ -44,14 +45,14 @@ exports.Bot = function Bot(discord) {
             }
 
             if (voiceChannel && commandChannel) {
-                return;
+                return false;
             }
         });
 
         if (voiceChannel && commandChannel) {
             self.commandChannel = commandChannel;
             self.voiceChannelConnection = await voiceChannel.join();
-            commands.setup(self);
+            self._commandManager = new CommandManager(self);
             self.client.on('message', handleMessage);
         } else {
             if (!voiceChannel) {
@@ -80,7 +81,7 @@ exports.Bot = function Bot(discord) {
             const commandName = parts[0];
             const params = parts.length > 1 ? parts.slice(1) : [];
 
-            const command = commands.manager.find(commandName);
+            const command = self._commandManager.find(commandName);
             if (command) {
                 await command.execute(self, params);
             } else {
@@ -88,7 +89,7 @@ exports.Bot = function Bot(discord) {
             }
         } catch (e) {
 
-            self.write('```\n'+e.stack+'\n```');
+            self.write('```\nFrom bot.js - handleMessage\n'+e.stack+'\n```');
         }
     }
 
@@ -97,8 +98,25 @@ exports.Bot = function Bot(discord) {
     }
 
     function write(message) {
-        self.commandChannel.send(message);
+        self.commandChannel.send(convertIcons(message));
+    }
+
+    function convertIcons(message) {
+        Array.from(message.matchAll(/:\S+:/), m => m[0])
+            .filter(function(value, index, array) {
+                return array.indexOf(value) === index;
+            }).forEach(match => {
+            self.client.emojis.cache.forEach(emoji => {
+                if (emoji.name === match.replace(/:/g, '')) {
+                    message = message.split(match).join(emoji.toString());
+                    return false;
+                }
+            });
+        });
+        return message;
     }
 
     return self;
-};
+}
+
+exports.Bot = Bot;

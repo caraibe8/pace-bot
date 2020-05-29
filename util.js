@@ -26,6 +26,20 @@ function RequestError(actual, display) {
     this.display = display;
 }
 
+/**
+ * TODO
+ *
+ * @param data
+ * @param failed
+ * @param message
+ * @constructor
+ */
+function ActionResult(data, failed, message) {
+    this.data = data;
+    this.failed= failed;
+    this.message = message;
+}
 
 exports.RequestResult = RequestResult;
 exports.RequestError = RequestError;
+exports.ActionResult = ActionResult;

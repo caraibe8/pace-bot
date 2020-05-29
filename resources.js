@@ -9,14 +9,14 @@ const resources = {
             },
         },
         clear: {
-            description: 'TODO',
+            description: 'Clears the queue and stop music',
             results: {
                 positive: 'Current song stopped and queue emptied',
                 negative: 'The queue is already empty',
             },
         },
         pause: {
-            description: 'TODO',
+            description: 'Pause current song',
             results: {
                 positive: 'Song paused',
                 negative: {
@@ -26,7 +26,7 @@ const resources = {
             },
         },
         resume: {
-            description: 'TODO',
+            description: 'Resume paused song',
             results: {
                 positive: 'Song resumed',
                 negative: {
@@ -36,14 +36,14 @@ const resources = {
             },
         },
         help: {
-            description: 'TODO',
+            description: 'List available commands',
         },
         next: {
-            description: 'TODO',
+            description: 'Plays next song',
             results: {
                 positive: {
                     playingNext: 'Playing the next song',
-                    queueEmpty: 'There aren\'t any song left to play :neutral_face:',
+                    queueEmpty: 'There aren\'t any song left to play :bidentantrum:',
                 },
                 negative: 'There are not queued song *(à revoir)*',
             },
@@ -51,6 +51,9 @@ const resources = {
     },
     songManager: {
         invalidUrl: 'It looks like "{{url}}" isn\'t a valid url',
+        privateVideo: 'TODO (private)',
+        genericError: 'An error has occured while trying to play the song at {{url}}',
+        genericErrorWhileReading: 'An error has occured while playing the song at {{url}}',
         errorCode403: 'Youtube is telling me i am not allowed to access this playlist :bidensad:',
         errorCode404: 'Youtube is telling me that this playlist doesn\'t exist :bidenconfused:',
     },
