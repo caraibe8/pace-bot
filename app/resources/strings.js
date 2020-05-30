@@ -1,4 +1,4 @@
-const resources = {
+const strings = {
     unknownCommand: 'Sorry, I don\'t know this command... :bidenconfused:',
     invalidParams: 'TODO\nUsage: {{usage}}',
     commands: {
@@ -57,6 +57,10 @@ const resources = {
         errorCode403: 'Youtube is telling me i am not allowed to access this playlist :bidensad:',
         errorCode404: 'Youtube is telling me that this playlist doesn\'t exist :bidenconfused:',
     },
+    bot: {
+        ready: 'Hello everyone! I am ready to take your requests.',
+        loggingOut: 'TODO (logout)',
+    },
 };
 
 /**
@@ -69,7 +73,7 @@ const resources = {
  */
 exports.resource = function (resourceName, params = []) {
     const resourceNameParts = resourceName.split('.');
-    let resource = resources;
+    let resource = strings;
 
     resourceNameParts.forEach(part => {
         resource = resource[part];

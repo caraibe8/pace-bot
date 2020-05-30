@@ -3,8 +3,8 @@ const Song = require('./song.js').Song;
 const RequestError = require('../util.js').RequestError;
 const RequestResult = require('../util.js').RequestResult;
 const ActionResult = require('../util.js').ActionResult;
-const api = require('../apiReferences.js').api;
-const __ = require('../resources.js').resource;
+const api = require('../resources/apiReferences.js').api;
+const __ = require('../resources/strings.js').resource;
 
 const maxSongsPerRequest = 1;
 

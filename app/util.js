@@ -27,11 +27,12 @@ function RequestError(actual, display) {
 }
 
 /**
- * TODO
+ * @description An object representing the result of an action
+ * @author Alexandre Gallant <1alexandregallant@gmail.com>
  *
- * @param data
- * @param failed
- * @param message
+ * @param {object} data The data returned by the the action
+ * @param {boolean} failed If the action failed
+ * @param {string} message The message to display
  * @constructor
  */
 function ActionResult(data, failed, message) {

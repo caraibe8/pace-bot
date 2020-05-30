@@ -1,4 +1,4 @@
-const __ = require('../resources.js').resource;
+const __ = require('../resources/strings.js').resource;
 const ActionResult = require('../util.js').ActionResult;
 const Song = require('./song.js').Song;
 const Playlist = require('./playlist.js').Playlist;
@@ -7,7 +7,7 @@ const typeSong = 'song';
 const typePlaylist = 'playlist';
 
 /**
- * @description TODO
+ * @description An object containing everything concerning the songs
  * @author Alexandre Gallant <1alexandregallant@gmail.com>
  *
  * @param {Bot} bot The bot to bind to the new instance

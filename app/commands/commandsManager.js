@@ -1,34 +1,6 @@
-const __ = require('./resources.js').resource;
-const SongManager = require('./songs/songManager.js').SongManager;
-
-
-/**
- * @description An object representing a command
- * @author Alexandre Gallant <1alexandregallant@gmail.com>
- *
- * @param {string} name The name of the command
- * @param {string} description The description of the command
- * @param {function(Bot, array)} func The function to call to execute the command
- * @constructor
- */
-function Command(name, description, func) {
-    const self = this;
-    this.name = name;
-    this.description = description;
-    this.execute = func;
-
-    this.toString = toString;
-
-    /**
-     * @description Converts the command to a string and returns the result
-     * @author Alexandre Gallant <1alexandregallant@gmail.com>
-     *
-     * @returns {string} The string
-     */
-    function toString() {
-        return '`' + self.name + '` - ' + self.description;
-    }
-}
+const __ = require('../resources/strings.js').resource;
+const SongManager = require('../songs/songManager.js').SongManager;
+const Command = require('./command.js').Command;
 
 /**
  * @description An object containing all the possible commands
@@ -63,7 +35,6 @@ function CommandManager(bot) {
         return false;
     }
 
-    /* COMMANDS */
     const commands = [
         new Command('play', __('commands.play.description'), play),
         new Command('clear', __('commands.clear.description'), clear),
