@@ -6,7 +6,6 @@ exports.constants = {
     adminRoles: [
         'Administrator',
     ],
-    bannedUsersFile: 'bannedUsers' + this.savesFilesExtension,
+    bannedUsersFile: 'bannedUsers.dat',
     unbanCheckFrequency: 3600000, // In milliseconds
-    savesFilesExtension: '.dat',
 };
