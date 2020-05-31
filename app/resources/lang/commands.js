@@ -74,7 +74,7 @@ exports.strings = {
         },
     },
     logout: {
-        description: 'Shut down the bot',
+        description: 'Shuts down the bot',
         results: {
             positive: 'Loging out!',
             negative: 'Cannot log out.',
