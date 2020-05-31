@@ -5,13 +5,15 @@
  * @param {string} name The name of the command
  * @param {string} description The description of the command
  * @param {function(Bot, array)} func The function to call to execute the command
+ * @param {boolean} requireAdmin If the command requires the user to be an administrator to be executed
  * @constructor
  */
-function Command(name, description, func) {
+function Command(name, description, func, requireAdmin = false) {
     const self = this;
     this.name = name;
     this.description = description;
     this.execute = func;
+    this.requireAdmin = requireAdmin;
 
     this.toString = toString;
 

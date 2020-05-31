@@ -37,6 +37,15 @@ const strings = {
         },
         help: {
             description: 'List available commands',
+            results: {
+                positive: {
+                    messageSent: 'List of commands sent.',
+                },
+                negative: {
+                    notSent: 'An error occured while trying to send the list',
+                    notAllowed: 'You are not allowed to use the parameter `a`',
+                }
+            },
         },
         next: {
             description: 'Plays next song',
@@ -46,6 +55,32 @@ const strings = {
                     queueEmpty: 'There aren\'t any song left to play :bidentantrum:',
                 },
                 negative: 'There are not queued song *(à revoir)*',
+            },
+        },
+        ban: {
+            description: 'TODO',
+            results: {
+                positive: '{{username}} banned for {{time}} hour(s)',
+                negative: {
+                    invalidDuration: 'The value of the parameter "duration" must be a number bigger than 0',
+                    isAdmin: 'Administrators cannot be ban',
+                },
+            },
+        },
+        unban: {
+            description: 'TODO',
+            results: {
+                positive: '{{username}} unbanned',
+                negative: {
+                    notBanned: '{{username}} isn\'t banned',
+                },
+            },
+        },
+        logout: {
+            description: 'TODO',
+            results: {
+                positive: 'TODO',
+                negative: 'TODO',
             },
         },
     },

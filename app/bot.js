@@ -2,6 +2,8 @@ const __ = require('./resources/strings.js').resource;
 const constants = require('./resources/constants.js').constants;
 const CommandManager = require('./commands/commandsManager.js').CommandManager;
 const SongManager = require('./songs/songManager.js').SongManager;
+const CommandData = require('./commands/commandData.js').CommandData;
+const users = require('./users/index.js').users;
 
 function Bot(discord) {
     /* Constant */
@@ -14,9 +16,11 @@ function Bot(discord) {
     this.voiceChannelConnection = null;
     this._commandManager = null;
     this._songManager = null;
+    this.bannedUsersManager = null;
 
     /* Functions */
     this.login = login;
+    this.logout = logout;
     this.write = write;
 
     /* Initialize */
@@ -29,7 +33,7 @@ function Bot(discord) {
      * @author ALexandre Gallant <1alexandregallant@gmail.com>
      */
     async function onReady() {
-        console.log(`Logged in as ${self.client.user.tag}!`);
+        console.log(`Logged in as ${self.client.user.tag}`);
 
         if (await setup()) {
             if (constants.displayReadyMessage) {
@@ -48,8 +52,6 @@ function Bot(discord) {
      * @returns {Promise<boolean>} If the setup was successful
      */
     async function setup() {
-        const timeout = 10000;
-
         let voiceChannel = null;
         let commandChannel = null;
         self.client.channels.cache.forEach(channel => {
@@ -69,9 +71,12 @@ function Bot(discord) {
         if (voiceChannel && commandChannel) {
             self.commandChannel = commandChannel;
             self.voiceChannelConnection = await voiceChannel.join();
-            self._commandManager = new CommandManager(self);
+            self._commandManager = new CommandManager();
             self._songManager = new SongManager(self);
             self.client.on('message', handleMessage);
+            self.bannedUsersManager =  new users.BannedUsersManager(self);
+            self.bannedUsersManager.updateList();
+            self.client.setInterval(self.bannedUsersManager.updateList, constants.unbanCheckFrequency);
             return true;
         } else {
             if (!voiceChannel) {
@@ -95,13 +100,13 @@ function Bot(discord) {
             if (message.channel.name !== constants.commandChannelName || message.content[0] !== constants.commandsPrefix) {
                 return;
             }
-            const parts = message.content.substr(1).split(' ');
-            const commandName = parts[0];
-            const params = parts.length > 1 ? parts.slice(1) : [];
-
-            const command = self._commandManager.find(commandName);
+            const commandData = new CommandData(message, self);
+            if (self.bannedUsersManager.find(commandData.member.user)) {
+                return;
+            }
+            const command = self._commandManager.find(commandData);
             if (command) {
-                await command.execute(self, params);
+                await command.execute(commandData);
             } else {
                 self.write(__('unknownCommand'));
             }
@@ -115,14 +120,21 @@ function Bot(discord) {
         self.client.login(token);
     }
 
+    async function logout() {
+        await write(__('bot.loggingOut'));
+        self.bannedUsersManager.save(constants.bannedUsersFile);
+        await self.client.destroy();
+        process.exit(0);
+    }
+
     /**
      * @description Writes the given string to the command channel
      * @author Alexandre Gallant <1alexandregallant@gmail.com>
      *
      * @param {string} message The message to write
      */
-    function write(message) {
-        self.commandChannel.send(convertEmojis(message));
+    async function write(message) {
+        await self.commandChannel.send(convertEmojis(message));
     }
 
     /**
