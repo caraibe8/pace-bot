@@ -4,7 +4,7 @@ const util = require('../util.js');
 
 async function play(commandData) {
     if (!commandData.args || commandData.args.length === 0) {
-        commandData.bot.write(__('invalidParams', [{name: 'usage', value: '`play <url>`'}]));
+        commandData.bot.write(__('commands.invalidParams', [{name: 'usage', value: '`play <url>`'}]));
         return;
     }
     commandData.bot.write((await commandData.bot._songManager.addToQueue(commandData.args[0])).message);
@@ -57,6 +57,10 @@ function ban(commandData) {
     }
 
     const userToBan = commandData.message.mentions.users.first();
+    if (!userToBan) {
+        commandData.bot.write(__('commands.invalidParams', [{name: 'usage', value: '`unban <user>`'}]));
+        return;
+    }
     if (util.isAdmin(util.convertUserToGuildMember(userToBan))) {
         commandData.bot.write(__('commands.ban.results.negative.isAdmin'));
         return;
@@ -71,11 +75,15 @@ function ban(commandData) {
 
 function unban(commandData) {
     if (commandData.args.length < 1) {
-        commandData.bot.write(__('invalidParams', [{name: 'usage', value: '`unban <user>`'}]));
+        commandData.bot.write(__('commands.invalidParams', [{name: 'usage', value: '`unban <user>`'}]));
         return;
     }
 
     const userToUnban = commandData.message.mentions.users.first();
+    if (!userToUnban) {
+        commandData.bot.write(__('commands.invalidParams', [{name: 'usage', value: '`unban <user>`'}]));
+        return;
+    }
     commandData.bot.write(commandData.bot.bannedUsersManager.unban(userToUnban).message);
 }
 

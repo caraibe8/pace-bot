@@ -1,5 +1,3 @@
-const __ = require('../resources/strings.js').resource;
-const SongManager = require('../songs/songManager.js').SongManager;
 const Command = require('./command.js').Command;
 
 /**
@@ -8,7 +6,6 @@ const Command = require('./command.js').Command;
  * @constructor
  */
 function CommandManager() {
-    const self = this;
     const commands = require('./list.js').commands;
 
     this.find = find;

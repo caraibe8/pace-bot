@@ -185,13 +185,13 @@ function SongManager(bot) {
             next();
         }).on('error', error => {
             if (error.message === 'input stream: Video unavailable') {
-                self._bot.write(__('songManager.invalidUrl', [{name: 'url', value:song.getUrl()}]));
+                self._bot.write(__('songManager.errors.invalidUrl', [{name: 'url', value:song.getUrl()}]));
             } else if (error.message === 'input stream: This is a private video. Please sign in to verify that you may see it.') {
-                self._bot.write(__('songManager.privateVideo'));
+                self._bot.write(__('songManager.errors.privateVideo'));
             } else if (error.message === 'read ECONNRESET') {
-                self._bot.write(__('songManager.genericErrorWhileReading', [{name: 'url', value:song.getUrl()}]));
+                self._bot.write(__('songManager.errors.genericErrorWhileReading', [{name: 'url', value:song.getUrl()}]));
             } else if (error.message === 'input stream: Too many redirects') {
-                self._bot.write(__('songManager.genericError', [{name: 'url', value:song.getUrl()}]));
+                self._bot.write(__('songManager.errors.genericError', [{name: 'url', value:song.getUrl()}]));
             }  else {
                 self._bot.write('Unknown error message: "'+error.message+'"\nStack trace:\n'+error.stack);
             }

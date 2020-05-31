@@ -125,8 +125,8 @@ function Playlist(id) {
             }).catch(function(res) {
                 let errorDisplay = null;
                 switch (res.response.data.error.code) {
-                    case 403: errorDisplay = __('songManager.errorCode403'); break;
-                    case 404: errorDisplay = __('songManager.errorCode404'); break;
+                    case 403: errorDisplay = __('songManager.errors.errorCode403'); break;
+                    case 404: errorDisplay = __('songManager.errors.errorCode404'); break;
                     default: {
                         console.log('UNSUPPORTED STATUS CODE');
                         console.log(res);

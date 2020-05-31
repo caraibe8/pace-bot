@@ -108,7 +108,7 @@ function Bot(discord) {
             if (command) {
                 await command.execute(commandData);
             } else {
-                self.write(__('unknownCommand'));
+                self.write(__('bot.unknownCommand'));
             }
         } catch (e) {
 
