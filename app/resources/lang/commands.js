@@ -2,7 +2,10 @@ exports.strings = {
     play: {
         description: 'plays the requested song',
         results: {
-            positive: '{{amount}} songs queued',
+            positive: {
+                songsQueued: '{{amount}} song(s) queued',
+                queuingSongs: 'Queuing {{amount}} song(s)',
+            },
         },
     },
     clear: {

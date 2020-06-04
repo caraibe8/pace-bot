@@ -17,7 +17,7 @@ exports.resource = function (resourceName, params = []) {
     });
 
     if (typeof(resource) != 'string') {
-        // TODO Gestion d'erreur
+        throw new ReferenceError();
     }
 
     params.forEach(param => {

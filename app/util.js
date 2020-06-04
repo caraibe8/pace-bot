@@ -34,7 +34,7 @@ function RequestError(actual, display) {
  *
  * @param {object} data The data returned by the the action
  * @param {boolean} failed If the action failed
- * @param {string} message The message to display
+ * @param {string|null} message The message to display
  * @constructor
  */
 function ActionResult(data, failed, message) {

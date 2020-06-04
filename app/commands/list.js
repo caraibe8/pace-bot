@@ -7,23 +7,23 @@ async function play(commandData) {
         commandData.bot.write(__('commands.invalidParams', [{name: 'usage', value: '`play <url>`'}]));
         return;
     }
-    commandData.bot.write((await commandData.bot._songManager.addToQueue(commandData.args[0])).message);
+    writeResult(commandData, await commandData.bot._songManager.addToQueue(commandData.args[0]));
 }
 
 function clear(commandData) {
-    commandData.bot.write(commandData.bot._songManager.clear());
+    writeResult(commandData, commandData.bot._songManager.clear());
 }
 
 function pause(commandData) {
-    commandData.bot.write(commandData.bot._songManager.pause());
+    writeResult(commandData, commandData.bot._songManager.pause());
 }
 
 function resume(commandData) {
-    commandData.bot.write(commandData.bot._songManager.resume());
+    writeResult(commandData, commandData.bot._songManager.resume());
 }
 
 function next(commandData) {
-    commandData.bot.write(commandData.bot._songManager.next());
+    writeResult(commandData, commandData.bot._songManager.next());
 }
 
 function help(commandData) {
@@ -89,6 +89,18 @@ function unban(commandData) {
 
 function logout(commandData) {
     commandData.bot.logout();
+}
+
+/**
+ * @description Writes the given result if it's message isn't null
+ *
+ * @param {CommandData} commandData The instance used to execute the command
+ * @param {ActionResult} result The result to write
+ */
+function writeResult(commandData, result) {
+    if (result.message != null) {
+        commandData.bot.write(result.message);
+    }
 }
 
 const commands = [

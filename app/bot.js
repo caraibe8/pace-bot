@@ -132,9 +132,10 @@ function Bot(discord) {
      * @author Alexandre Gallant <1alexandregallant@gmail.com>
      *
      * @param {string} message The message to write
+     * @returns {Promise<*>} The message sent
      */
     async function write(message) {
-        await self.commandChannel.send(convertEmojis(message));
+        return await self.commandChannel.send(convertEmojis(message));
     }
 
     /**

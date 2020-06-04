@@ -65,7 +65,7 @@ function BannedUsersManager(bot) {
             });
         });
 
-        fs.writeFileSync(constants.bannedUsersFile, JSON.stringify(serializableBannedUsers));
+        fs.writeFileSync(constants.files.bannedUsersFile, JSON.stringify(serializableBannedUsers));
     }
 
     /**

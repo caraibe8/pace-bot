@@ -13,6 +13,7 @@ function Song(url) {
 
     this.getStream = getStream;
     this.getUrl = getUrl;
+    this.getTitle = getTitle;
 
     /**
      * @author Alexandre Gallant <1alexandregallant@gmail.com>
@@ -20,7 +21,7 @@ function Song(url) {
      * @returns {Readable} The song's stream
      */
     function getStream() {
-        return ytdl(self._url, {filter: 'audioonly'})
+        return ytdl(self._url, {quality: 'lowestaudio', filter: 'audioonly'});
     }
 
     /**
@@ -31,6 +32,17 @@ function Song(url) {
     function getUrl() {
         return self._url;
     }
+
+    /**
+     * @author Alexandre Gallant <1alexandregallant@gmail.com>
+     *
+     * @returns {string} The song's title
+     */
+    async function getTitle() {
+        return (await ytdl.getBasicInfo(self._url)).title;
+    }
+
+
 }
 
 exports.Song = Song;

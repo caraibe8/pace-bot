@@ -4,8 +4,15 @@ exports.constants = {
     commandChannelName: 'music-bot-commands',
     commandsPrefix: '$',
     adminRoles: [
-        'Administrator',
+        'Fake admin',
     ],
-    bannedUsersFile: 'bannedUsers.dat',
     unbanCheckFrequency: 3600000, // In milliseconds
+    files: {
+        logFile: {
+            directoryPath: 'logs',
+            prefix: 'log_',
+            suffix: '.txt',
+        },
+        bannedUsersFile: 'bannedUsers.dat',
+    }
 };
